@@ -85,6 +85,7 @@ setuptools.setup(
         "tifffile>=2021.3.31",
         "verlib==0.1",
         "wxPython==4.1.0",
+        "zarr>=2.10.1",
     ],
     license="BSD",
     name="CellProfiler-Analyst",

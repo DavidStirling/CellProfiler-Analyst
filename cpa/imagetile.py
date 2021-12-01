@@ -36,7 +36,7 @@ class ImageTile(ImagePanel):
     between SortBins.
     '''
     def __init__(self, bin, obKey, images, chMap, selected=False, 
-                 scale=1.0, brightness=1.0, contrast=None, display_whole_image=False):
+                 scale=1.0, brightness=1.0, contrast='Linear', display_whole_image=False):
 
         ImagePanel.__init__(self, images, chMap, bin, scale=scale, 
                             brightness=brightness, contrast=contrast, display_whole_image=display_whole_image)

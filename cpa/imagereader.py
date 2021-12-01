@@ -17,13 +17,13 @@ class ThrowingURLopener(urllib.request.URLopener):
 
 class ImageReader(object):
 
-    def ReadImages(self, fds, log_io=True):
+    def ReadImages(self, fds, log_io=True, imKey=None):
         '''fds -- list of file descriptors (filenames or urls)
         returns a list of channels as numpy float32 arrays
         '''
         channels = []
         for i, filename_or_url in enumerate(fds):
-            image = self._read_image(filename_or_url, log_io=log_io)
+            image = self._read_image(filename_or_url, log_io=log_io, imKey=imKey, idx=i)
             if image is None:
                 return
             channels += self._extract_channels(filename_or_url, image,
@@ -42,7 +42,7 @@ class ImageReader(object):
 
         return channels
 
-    def _read_image(self, filename_or_url, log_io=True):
+    def _read_image(self, filename_or_url, log_io=True, imKey=None, idx=None):
         if p.image_url_prepend:
             parsed = urllib.parse.urlparse(p.image_url_prepend + filename_or_url)
             if parsed.scheme:
@@ -66,6 +66,20 @@ class ImageReader(object):
                 return
             except:
                 logging.info('Loading with ImageIO failed, falling back to BioFormats')
+        elif os.path.splitext(filename_or_url)[-1].lower() == '.zarr':
+            from .dbconnect import DBConnect, GetWhereClauseForImages
+            db = DBConnect()
+            image_name = p.image_path_cols[idx][15:]
+            frame_col = 'Image_Frame_' + image_name
+            select = f"SELECT Image_Metadata_Series, Image_Metadata_C, Image_Metadata_Z, Image_Metadata_T, {frame_col}"
+            select += ' FROM ' + p.image_table + ' WHERE ' + GetWhereClauseForImages([imKey])
+            data = db.execute(select)[0]
+            series, c, z, t, frame = [int(x) if x not in ("", None) else x for x in data]
+            if c is None and frame is not None:
+                c = frame
+            from cpa.zarrreader import get_zarr_reader
+            rdr = get_zarr_reader(filename_or_url)
+            return rdr.read(c=c, z=z, t=t, series=series, rescale=True, wants_max_intensity=False)
         if javabridge.get_env() is None:
             logging.debug("Starting javabridge")
             javabridge.start_vm(class_path=bioformats.JARS, run_headless=True)

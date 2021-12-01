@@ -27,7 +27,7 @@ class CellMontageFrame(wx.Frame):
         wx.Frame.__init__(self, parent, **kwargs)
         self.sb = SortBin(self)
         self.cp = wx.CollapsiblePane(self, label='Show controls', style=wx.CP_DEFAULT_STYLE|wx.CP_NO_TLW_RESIZE)
-        self.icp = ImageControlPanel(self.cp.GetPane(), self)
+        self.icp = ImageControlPanel(self.cp.GetPane(), self, contrast="Linear")
         
         self.Sizer = wx.BoxSizer(wx.VERTICAL)
         self.Sizer.Add(self.sb, 1, wx.EXPAND)

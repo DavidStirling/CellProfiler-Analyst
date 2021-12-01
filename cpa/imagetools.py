@@ -66,7 +66,7 @@ def FetchImage(imKey):
             log_io = wx.GetApp().frame.log_io
         except:
             log_io = True
-        imgs = ir.ReadImages(filenames, log_io)
+        imgs = ir.ReadImages(filenames, log_io, imKey=imKey)
         if imgs is None:
             # Loading failed
             return
